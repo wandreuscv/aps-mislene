@@ -1,4 +1,6 @@
 # Built application files
+node_modules
+.idea
 *.apk
 *.ap_
 *.aab
