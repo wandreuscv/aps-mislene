@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "apsMislene",
-    "slug": "apsMislene",
+    "name": "aps-rn-hooks",
+    "slug": "aps-rn-hooks",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

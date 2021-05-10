@@ -1,173 +1,147 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Image, TextInput, TouchableHighlight } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
-import Header from './components/Header';
+export default function App() {
+  const [quantity, setQuantity] = useState(0);
+  const finishOrder = useRef(null);
 
-const defaultState = {
-  buttonClick: false,
-  name: '',
-  input: '',
-  curso: 0,
-  cursos: [
-    { key: 1, name: 'Sistemas de Informação', },
-    { key: 2, name: 'Matemática' },
-    { key: 3, name: 'Publicidade e Propaganda' },
-    { key: 4, name: 'Admnistração' }
-  ],
+  useEffect(() => {
+    async function getStorage() {
+      const productStorage = await AsyncStorage.getItem('quantities');
 
-  periodo: 0,
-  periodos: [
-    { key: 1, number: 1 },
-    { key: 2, number: 2 },
-    { key: 3, number: 3 },
-    { key: 4, number: 4 },
-    { key: 5, number: 5 },
-    { key: 6, number: 6 },
-    { key: 7, number: 7 },
-    { key: 8, number: 8 },
-    { key: 9, number: 9 },
-    { key: 10, number: 10 },
-    { key: 11, number: 11 },
-    { key: 12, number: 12 },
-    { key: 13, number: 13 },
-    { key: 14, number: 14 }
-  ],
-  
-  turno: 0,
-  turnos: [
-    { key: 1, description: 'Diurno' },
-    { key: 2, description: 'Noturno' },
-    { key: 3, description: 'Integral' }
-  ]
-};
-
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {...defaultState};
-    this.sendUserInfo = this.sendUserInfo.bind(this);
-  }
-
-  sendUserInfo() {
-    if (this.state.input === '') {
-      alert('Digite o seu nome!');
+      if (productStorage) {
+        setQuantity(Number(productStorage));
+      }
     }
-    else {
-      this.setState({ name: this.state.input });
-      this.setState({ buttonClick: true })
+    getStorage();
+  }, []);
+
+  useEffect(() => {
+    async function saveStorage() {
+      await AsyncStorage.setItem('quantities', quantity);
     }
+    saveStorage();
+  }, [quantity]);
+
+  function focusOrder() {
+    finishOrder.current.focus();
   }
 
-  render() {
-    let nomesCursos = this.state.cursos.map((v, k) => {
-      return <Picker.Item key={k} value={k} label={v.name} />
-    });
-    let periodosCursos = this.state.periodos.map((v, k) => {
-      return <Picker.Item key={k} value={k} label={v.number} />
-    })
-    let turnosCursos = this.state.turnos.map((v, k) => {
-      return <Picker.Item key={k} value={k} label={v.description} />
-    })
+  return (
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Image
+          style={styles.productImage}
+          source={{
+            uri: 'https://lojamultilaser.vteximg.com.br/arquivos/ids/196221-430-430/PH258_01.png?v=637547961339830000'
+          }}
+        />
 
-    return (
-      <SafeAreaView style={styles.container}>
-        <Header />
-        <SafeAreaView style={styles.menuOptions}>
-          <Text style={styles.title}>Preencha todos os campos</Text>
-          <TextInput
-            style={styles.picker}
-            placeholder="Digite seu nome"
-            onChangeText={((name) => this.setState({ input: name }))}
-          />
+        <View style={styles.productInfo}>
+          <Text style={{ fontWeight: 'bold' }}>Headset Gamer USB Warrior Volker - PH258</Text>
+          <Text>Quantidade: <Text style={{ fontWeight: 'bold' }}>{quantity}</Text></Text>
 
-          <Text style={styles.pickerText}>Curso</Text>
-          <Picker
-            style={styles.picker}
-            selectedValue={this.state.curso}
-            onValueChange={(itemValue) => this.setState({ curso: itemValue })}
-          >
-            {nomesCursos}
-          </Picker>
+          <View style={styles.addProduct}>
+            <TextInput
+              style={styles.textInput}
+              placeholder='0'
+              value={quantity}
+              editable={false}
+            />
 
-          <Text style={styles.pickerText}>Período</Text>
-          <Picker
-            style={styles.picker}
-            selectedValue={this.state.periodo}
-            onValueChange={(itemValue) => this.setState({ periodo: itemValue })}
-          >
-            {periodosCursos}
-          </Picker>
+            <TouchableHighlight
+              style={styles.addButton}
+              onPress={() => setQuantity(quantity + 1)}
+            >
+              <Text style={{ color: '#ffff', fontWeight: 'bold', fontSize: 18, textAlign: 'center' }}>+</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </View>
 
-          <Text style={styles.pickerText}>Turno</Text>
-          <Picker
-            style={styles.picker}
-            selectedValue={this.state.turno}
-            onValueChange={(itemValue) => this.setState({ turno: itemValue })}
-          >
-            {turnosCursos}
-          </Picker>
+      <View style={styles.orderButtons}>
+        <TouchableHighlight
+          style={styles.finishButton}
+          onPress={focusOrder}
+        >
+          <Text style={{ fontSize: 12, color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>FINALIZAR</Text>
+        </TouchableHighlight>
 
-          <TouchableOpacity
-            onPress={this.sendUserInfo}
-            style={styles.button}
-          >
-            <Text style={{ color: '#fff', fontWeight: '450' }}>Concluir</Text>
-          </TouchableOpacity>
-
-          {this.state.buttonClick && (
-            <SafeAreaView style={styles.selectedOptions}>
-              <Text style={styles.title}>Informações: </Text>
-
-              <Text><Text style={{ fontWeight: 'bold' }}>Nome: </Text>{this.state.name}</Text>
-
-              <Text><Text style={{ fontWeight: 'bold' }}>Curso: </Text>{this.state.cursos[this.state.curso].name}</Text>
-
-              <Text><Text style={{ fontWeight: 'bold' }}>Período: </Text>{this.state.periodos[this.state.periodo].number} </Text>
-
-              <Text><Text style={{ fontWeight: 'bold' }}>Turno: </Text>{this.state.turnos[this.state.turno].description}</Text>
-            </SafeAreaView>
-          )}
-        </SafeAreaView>
-      </SafeAreaView>
-    );
-  }
+        <TouchableHighlight
+          style={styles.orderButton}
+          ref={finishOrder}
+        >
+          <Text style={{ fontSize: 12, color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>REALIZAR PEDIDO</Text>
+        </TouchableHighlight>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  menuOptions: {
-    display: 'flex',
-    alignSelf: 'center',
-    margin: 20,
-    backgroundColor: 'rebeccapurple'
-  },
-  title: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    marginBottom: 10
-  },
-  button: {
-    backgroundColor: 'greenyellow',
-    borderRadius: 4,
-    width: 300,
-    height: 50,
+  container: {
     alignItems: 'center',
-    justifyContent: 'center',
+    margin: 40
+  },
+  card: {
+    flexDirection: 'row',
+    width: 270,
+    height: 150,
+    borderRadius: 8,
+    borderWidth: 2
+  },
+  productImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 4,
+    marginTop: 20
+  },
+  productInfo: {
+    flexDirection: 'column',
+    width: 150,
+    margin: 15
+  },
+  addProduct: {
+    display: 'flex',
+    flexDirection: 'row',
     marginTop: 10
   },
-  picker: {
-    height: 30,
-    borderColor: 'greenyellow',
-    borderWidth: 2,
+  textInput: {
     borderRadius: 4,
+    borderWidth: 1,
+    width: 60,
+    height: 30,
     padding: 5
   },
-  pickerText: {
-    fontWeight: 'bold',
-    marginTop: 5,
-    marginBottom: 5
+  addButton: {
+    backgroundColor: '#99D178',
+    width: 30,
+    marginLeft: 10,
+    borderRadius: 15
   },
-  selectedOptions: {
-    marginTop: 20
+  finishButton: {
+    justifyContent: 'center',
+    backgroundColor: '#99D178',
+    width: 150,
+    height: 30,
+    borderRadius: 4,
+    borderColor: '#000000',
+    borderWidth: 1
+  },
+  orderButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    margin: 20
+  },
+  orderButton: {
+    justifyContent: 'center',
+    backgroundColor: '#99D178',
+    width: 150,
+    height: 30,
+    borderRadius: 8,
+    marginTop: 400,
+    alignItems: 'center'
   }
 });
